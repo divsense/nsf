@@ -1,0 +1,59 @@
+[
+  {
+    "_id":"f1",
+    "t": "Folder 1",
+    "u": [ ["type","folder"],["rules","r1"],["fold","true"] ],
+    "a": [ ["children", ["d2", "d3", "d4"]] ]
+  }
+ ,{
+    "_id":"f2",
+    "t": "Folder 2",
+    "u": [ ["type","folder"],["rules","r1"],["fold","false"] ],
+    "a": [ ["children", ["d5"]] ]
+  }
+ ,{
+    "_id":"d1",
+    "t": "Doc 1",
+    "u": [ ["type","doc"],["rules","r2"],["fold","true"] ],
+    "a": [ ["children", ["c11","c12"]] ]
+  }
+ ,{
+    "_id":"d4",
+    "p": "f1",
+    "t": "Doc 4",
+    "u": [ ["type","doc"],["rules","r2"] ]
+  }
+ ,{
+    "_id":"d3",
+    "p": "f1",
+    "t": "Doc 3",
+    "u": [ ["type","doc"],["rules","r2"] ]
+  }
+ ,{
+    "_id":"d2",
+    "p": "f1",
+    "t": "Doc 2",
+    "u": [ ["type","doc"],["rules","r2"] ]
+  }
+ ,{
+    "_id":"d5",
+    "p": "f2",
+    "t": "Doc 5",
+    "u": [ ["type","doc"],["rules","r2"] ]
+  }
+ ,{
+    "_id":"c11",
+    "p": "d1",
+    "t": "Content 11",
+    "u": [ ["type","text"],["rules","r3"] ],
+    "k": [ ["color","red"] ]
+  }
+ ,{
+    "_id":"c12",
+    "p": "d1",
+    "t": "Content 12",
+    "u": [ ["type","text"],["rules","r3"] ],
+    "k": [ ["fontstyle","italic"] ]
+  }
+]
+
