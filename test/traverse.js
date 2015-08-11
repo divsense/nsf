@@ -27,8 +27,7 @@ describe("traverse, no order", function(){
 			acc.push(node._id);
 		});
 
-		assert.deepEqual( acc, ["f1","f2","d1","d4","d3","d2","d5","c11","c12"], "Not equal");
-			
+		assert.deepEqual( acc, ["f1","f2","d1","d4","d3","d2","d5","c11","c12","c41"], "Not equal");
 
 	});
 
@@ -45,7 +44,7 @@ describe("traverse, level order", function(){
 			acc.push(node._id);
 		});
 
-		assert.deepEqual( acc, ["f1","f2","d1","d2","d3","d4","d5","c11","c12"], "Not equal");
+		assert.deepEqual( acc, ["f1","f2","d1","d2","d3","d4","c41","d5","c11","c12"], "Not equal");
 
 	});
 
@@ -62,7 +61,7 @@ describe("traverse, depth first", function(){
 			acc.push(node._id);
 		});
 
-		assert.deepEqual( acc, ["f1","d2","d3","d4","f2","d5","d1","c11","c12"], "Not equal");
+		assert.deepEqual( acc, ["f1","d2","d3","d4","c41","f2","d5","d1","c11","c12"], "Not equal");
 
 	});
 
@@ -82,17 +81,74 @@ describe("find, by ID", function(){
 
 });
 
-describe("build file system", function(){
+describe("take", function(){
 
-	it("should return data in right order", function(){
+	it("should return filtered nodes", function(){
 
 		var acc = [];
 
-		nsf.traverse( data, {order:nsf.DEPTH_FIRST}, function(err, node, level){
+		var options = {
+			order: nsf.DEPTH_FIRST,
+
+			take: {
+				u: {
+					   type: {
+								folder: 1,
+								doc: 1
+							 }
+
+				   }
+			}
+		};
+
+		nsf.traverse( data, options, function(err, node, level){
 			acc.push(node._id);
 		});
 
-		assert.deepEqual( acc, ["f1","d2","d3","d4","f2","d5","d1","c11","c12"], "Not equal");
+		assert.deepEqual( acc, ["f1","d2","d3","d4","f2","d5","d1"], "Not equal");
+
+	});
+
+
+});
+
+describe("build fs", function(){
+
+	it("should return fs nodes", function(){
+
+		var acc = [];
+		var path = "";
+
+		var options = {
+			order: nsf.DEPTH_FIRST,
+
+			take: {
+				u: {
+					   type: {
+								folder: 1,
+								doc: 1
+							 }
+
+				   }
+			}
+		};
+
+		nsf.traverse( data, options, function(err, node, level){
+
+//        console.log( level + "," );
+
+			if( !level ){
+		console.log( path );
+				path = "";
+			}
+
+			path += ("/" + node.t);
+
+			acc.push(node._id);
+		});
+
+
+//        assert.deepEqual( acc, ["f1","d2","d3","d4","f2","d5","d1"], "Not equal");
 
 	});
 

@@ -10,6 +10,26 @@ var NO_ORDER = 0;
 var LEVEL_ORDER = 1;
 var DEPTH_FIRST = 2;
 
+var takeProp = function( node_props, filter_props ){
+
+	if( node_props && filter_props ){
+		return node_props.some(function(a){
+			var p =  filter_props[ a[0] ];
+			return ( p && p[ a[1] ] );
+		})
+	}
+
+	return true;
+}
+
+var take = function( node, opt ){
+
+	if( opt.take && ( !takeProp( node.u, opt.take.u ) || !takeProp( node.k, opt.take.k ) ) ){
+		return false;
+	}
+	return true;
+}
+
 var findById = function( data ){
 	return function( id ){
 		for(var i = 0; i < data.length; i++ ){
@@ -53,10 +73,12 @@ var traverseDepthFirst = function( root, data, options, level, callback ){
 
 	return chs.some( function(n){
 
-		var res = !!callback( null, n, level );
+		var takeNode = take( n, options );
+
+		var res = takeNode && !!callback( null, n, level );
 
 		if( !res ){
-			res = traverseDepthFirst( n, data, options, (level + 1), callback );
+			res = traverseDepthFirst( n, data, options, level + 1, callback );
 		}
 
 		return res;
@@ -73,7 +95,7 @@ exports.traverse = function( data, options, callback ){
 
 	var level = 0;
 
-	if( !callback ){ return };
+	if( !callback ){ return }
 
 	options = options || {};
 
@@ -84,24 +106,27 @@ exports.traverse = function( data, options, callback ){
 		if( order === LEVEL_ORDER ){
 			for(var i = 0; i < data.length; i++ ){
 				if( !data[i].p ){
-					if( callback( null, data[i] ) ){
+					if( callback( null, data[i], 0 ) ){
 						return;
 					}
 				}
 			}
 			for(var i = 0; i < data.length; i++ ){
 				if( !data[i].p ){
-					traverseLevelOrder( data[i], data, options, 0, callback );
+					traverseLevelOrder( data[i], data, options, 1, callback );
 				}
 			}
 		}
 		else if( order === DEPTH_FIRST ){
 			for(var i = 0; i < data.length; i++ ){
 				if( !data[i].p ){
-					if( callback( null, data[i] ) ){
+
+					var takeNode = take( data[i], options );
+
+					if( takeNode && callback( null, data[i], 0 ) ){
 						return;
 					}
-					traverseDepthFirst( data[i], data, options, 0, callback );
+					traverseDepthFirst( data[i], data, options, 1, callback );
 				}
 			}
 		}
