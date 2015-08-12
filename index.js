@@ -157,5 +157,9 @@ exports.findIndex = function( data, options ){
 	}
 }
 
+exports.has = function( key, value, prop ){
+	return prop.some( function(p){ return (p[0] === key && p[1] === value); });
+}
+
 exports.childNodes = childNodes;
 
