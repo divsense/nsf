@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/divsense/nsf#readme",
   "devDependencies": {
+    "lodash.compose": "^2.4.1",
     "mocha": "^2.2.5"
   }
 }

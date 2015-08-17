@@ -88,6 +88,50 @@ var traverseDepthFirst = function( root, data, options, level, callback ){
 
 }
 
+var props = function( obj ){
+	return Object.keys( obj ).reduce(function(m,a){
+		m.push( [ a, obj[ a ] ] );
+		return m;
+	}, []);
+}
+
+var makeNode = function( id, params ){
+
+	return function(set){
+
+		set = set || {};
+
+		var s = set[ id ] = {};
+
+		if( params.t ) s.t = params.t;
+
+		if( params.u ) s.u = props( params.u );
+
+		if( params.k ) s.k = props( params.k );
+
+		return set;
+	}
+}
+
+var setChildNodes = function( parentId, cids, side, branchName ){
+
+	return function(set){
+
+		side = side || "a";
+		branchName = branchName || "children-mmap";
+
+		var node = set[ parentId ];
+
+		node[ side ] = node[ side ] || [];
+
+		node[ side ].push( [ branchName, cids] );
+
+		cids.forEach( function(id){ set[id].p = parentId });
+
+		return set;
+	}
+}
+
 exports.LEVEL_ORDER = LEVEL_ORDER;
 exports.DEPTH_FIRST = DEPTH_FIRST;
 
@@ -162,4 +206,7 @@ exports.has = function( key, value, prop ){
 }
 
 exports.childNodes = childNodes;
+
+exports.makeNode = makeNode;
+exports.setChildNodes = setChildNodes;
 
