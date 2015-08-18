@@ -1,6 +1,7 @@
 //
 // Divsense Nodes Storage Format
 //
+var find = require("lodash.find");
 
 var BRANCH_CLASS = 0;
 var BRANCH_NODES = 1;
@@ -99,9 +100,9 @@ var makeNode = function( id, params ){
 
 	return function(set){
 
-		set = set || {};
+		set = set || [];
 
-		var s = set[ id ] = {};
+		var s = {_id: id};
 
 		if( params.t ) s.t = params.t;
 
@@ -109,6 +110,7 @@ var makeNode = function( id, params ){
 
 		if( params.k ) s.k = props( params.k );
 
+		set.push( s );
 		return set;
 	}
 }
@@ -120,13 +122,23 @@ var setChildNodes = function( parentId, cids, side, branchName ){
 		side = side || "a";
 		branchName = branchName || "children-mmap";
 
-		var node = set[ parentId ];
+		var node = find( set, function(e){return e._id === parentId});
 
-		node[ side ] = node[ side ] || [];
+		if( node ){
 
-		node[ side ].push( [ branchName, cids] );
+			node[ side ] = node[ side ] || [];
 
-		cids.forEach( function(id){ set[id].p = parentId });
+			node[ side ].push( [ branchName, cids] );
+
+			cids.forEach( function(id){ 
+
+				var node = find( set, function(e){return e._id === id});
+				if( node ){
+					node.p = parentId;
+				}
+
+			});
+		}
 
 		return set;
 	}
