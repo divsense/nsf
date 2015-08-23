@@ -11,24 +11,20 @@ var NO_ORDER = 0;
 var LEVEL_ORDER = 1;
 var DEPTH_FIRST = 2;
 
-var takeProp = function( node_props, filter_props ){
+var isProp = function( node_props, filter_props ){
 
 	if( node_props && filter_props ){
 		return node_props.some(function(a){
 			var p =  filter_props[ a[0] ];
 			return ( p && p[ a[1] ] );
-		})
+		});
 	}
 
-	return true;
+	return false;
 }
 
-var take = function( node, opt ){
-
-	if( opt.take && ( !takeProp( node.u, opt.take.u ) || !takeProp( node.k, opt.take.k ) ) ){
-		return false;
-	}
-	return true;
+var isOpt = function( node, opt, prop ){
+	return isProp( node.u, opt[prop].u ) || isProp( node.k, opt[prop].k );
 }
 
 var findById = function( data ){
@@ -74,12 +70,15 @@ var traverseDepthFirst = function( root, data, options, level, callback ){
 
 	return chs.some( function(n){
 
-		var takeNode = take( n, options );
+		var res, ll;
 
-		var res = takeNode && !!callback( null, n, level );
-
-		if( !res ){
-			res = traverseDepthFirst( n, data, options, level + 1, callback );
+		if( options.pass && isOpt( n, options, "pass" ) ){
+			res = traverseDepthFirst( n, data, options, level, callback );
+		}
+		else if( !options.take || isOpt( n, options, "take" ) ){
+			if( !callback( null, n, level ) ){
+				res = traverseDepthFirst( n, data, options, level + 1, callback );
+			}
 		}
 
 		return res;
@@ -176,13 +175,14 @@ exports.traverse = function( data, options, callback ){
 		else if( order === DEPTH_FIRST ){
 			for(var i = 0; i < data.length; i++ ){
 				if( !data[i].p ){
-
-					var takeNode = take( data[i], options );
-
-					if( takeNode && callback( null, data[i], 0 ) ){
-						return;
+					if( options.pass && isOpt( data[i], options, "pass" ) ){
+						res = traverseDepthFirst( data[i], data, options, 0, callback );
 					}
-					traverseDepthFirst( data[i], data, options, 1, callback );
+					else if( !options.take || isOpt( data[i], options, "take" ) ){
+						if( !callback( null, data[i], level ) ){
+							traverseDepthFirst( data[i], data, options, 1, callback );
+						}
+					}
 				}
 			}
 		}

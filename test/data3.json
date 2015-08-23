@@ -1,0 +1,66 @@
+[
+  {
+    "_id":"f1",
+    "t": "Folder_1",
+    "u": [ ["type","folder"] ],
+    "a": [ ["children", ["t1", "d3"]] ]
+  }
+ ,{
+    "_id":"t1",
+    "p": "f1",
+    "t": "Text_1",
+    "u": [ ["type","text"] ],
+    "a": [ ["children", ["t2"]] ]
+  }
+
+ ,{
+    "_id":"t2",
+    "p": "t1",
+    "t": "Text_2",
+    "u": [ ["type","text"] ],
+    "a": [ ["children", ["f2"]] ]
+  }
+ ,{
+    "_id":"f2",
+    "p": "t2",
+    "t": "Folder_2",
+    "u": [ ["type","folder"] ],
+    "a": [ ["children", ["d1", "d2"]] ]
+  }
+ ,{
+    "_id":"d1",
+    "p": "f2",
+    "t": "Doc_1",
+    "u": [ ["type","doc"] ]
+  }
+ ,{
+    "_id":"d2",
+    "p": "f2",
+    "t": "Doc_2",
+    "u": [ ["type","doc"] ]
+  }
+ ,{
+    "_id":"f3",
+    "t": "Folder_3",
+    "u": [ ["type","folder"] ],
+    "a": [ ["children", ["d4"]] ]
+  }
+ ,{
+    "_id":"d5",
+    "t": "Doc_5",
+    "u": [ ["type","doc"] ]
+  }
+ ,{
+    "_id":"d4",
+    "p": "f3",
+    "t": "Doc_4",
+    "u": [ ["type","doc"] ]
+  }
+ ,{
+    "_id":"d3",
+    "p": "f1",
+    "t": "Doc_3",
+    "u": [ ["type","doc"] ]
+  }
+]
+
