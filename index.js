@@ -27,6 +27,7 @@ var isOpt = function( node, opt, prop ){
 	return isProp( node.u, opt[prop].u ) || isProp( node.k, opt[prop].k );
 }
 
+// @todo make a version of this a lot faster by using a Map which keeps all the data
 var findById = function( data ){
 	return function( id ){
 		for(var i = 0; i < data.length; i++ ){
@@ -146,6 +147,7 @@ var setChildNodes = function( parentId, cids, side, branchName ){
 exports.LEVEL_ORDER = LEVEL_ORDER;
 exports.DEPTH_FIRST = DEPTH_FIRST;
 
+// @todo This should be refactor to use Iterable and Generators
 exports.traverse = function( data, options, callback ){
 
 	var level = 0;
