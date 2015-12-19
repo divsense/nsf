@@ -11,23 +11,26 @@ var NO_ORDER = 0;
 var LEVEL_ORDER = 1;
 var DEPTH_FIRST = 2;
 
-var isProp = function( node_props, filter_props ){
+var takeProp = function( node_props, filter_props ){
 
 	if( node_props && filter_props ){
 		return node_props.some(function(a){
 			var p =  filter_props[ a[0] ];
 			return ( p && p[ a[1] ] );
-		});
+		})
 	}
 
-	return false;
+	return true;
 }
 
-var isOpt = function( node, opt, prop ){
-	return isProp( node.u, opt[prop].u ) || isProp( node.k, opt[prop].k );
+var take = function( node, opt ){
+
+	if( opt.take && ( !takeProp( node.u, opt.take.u ) || !takeProp( node.k, opt.take.k ) ) ){
+		return false;
+	}
+	return true;
 }
 
-// @todo make a version of this a lot faster by using a Map which keeps all the data
 var findById = function( data ){
 	return function( id ){
 		for(var i = 0; i < data.length; i++ ){
@@ -71,15 +74,12 @@ var traverseDepthFirst = function( root, data, options, level, callback ){
 
 	return chs.some( function(n){
 
-		var res, ll;
+		var takeNode = take( n, options );
 
-		if( options.pass && isOpt( n, options, "pass" ) ){
-			res = traverseDepthFirst( n, data, options, level, callback );
-		}
-		else if( !options.take || isOpt( n, options, "take" ) ){
-			if( !callback( null, n, level ) ){
-				res = traverseDepthFirst( n, data, options, level + 1, callback );
-			}
+		var res = takeNode && !!callback( null, n, level );
+
+		if( !res ){
+			res = traverseDepthFirst( n, data, options, level + 1, callback );
 		}
 
 		return res;
@@ -147,7 +147,6 @@ var setChildNodes = function( parentId, cids, side, branchName ){
 exports.LEVEL_ORDER = LEVEL_ORDER;
 exports.DEPTH_FIRST = DEPTH_FIRST;
 
-// @todo This should be refactor to use Iterable and Generators
 exports.traverse = function( data, options, callback ){
 
 	var level = 0;
@@ -177,14 +176,13 @@ exports.traverse = function( data, options, callback ){
 		else if( order === DEPTH_FIRST ){
 			for(var i = 0; i < data.length; i++ ){
 				if( !data[i].p ){
-					if( options.pass && isOpt( data[i], options, "pass" ) ){
-						res = traverseDepthFirst( data[i], data, options, 0, callback );
+
+					var takeNode = take( data[i], options );
+
+					if( takeNode && callback( null, data[i], 0 ) ){
+						return;
 					}
-					else if( !options.take || isOpt( data[i], options, "take" ) ){
-						if( !callback( null, data[i], level ) ){
-							traverseDepthFirst( data[i], data, options, 1, callback );
-						}
-					}
+					traverseDepthFirst( data[i], data, options, 1, callback );
 				}
 			}
 		}
@@ -213,6 +211,23 @@ exports.findIndex = function( data, options ){
 			}
 		}
 	}
+}
+
+exports.mmapToMap = function(data){
+    var m = new Map();
+    if( Array.isArray( data ) ){
+	for(var i = 0; i < data.length; i++ ){
+	    m.set(data[i]._id, data[i])
+	}
+    }else throw new Error("An mmap is always an Array")
+    return m
+}
+
+exports.fastFind = function( data, nodeId ){
+    if(data instanceof Map)
+        return data.get(nodeId)
+    else throw new Error("The func fastFind only expects a Map. Please use mmapToMap" +
+                         "to convert to Map first and keep the data locally");
 }
 
 exports.has = function( key, value, prop ){
