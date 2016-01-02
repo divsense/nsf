@@ -235,58 +235,58 @@ exports.setChildNodes = setChildNodes;
 // Parents can pass data and their state defined in prep_call to children.
 // Siblings compute based on state and can pass computed values to the next sibling via compute_call.
 // When all siblings are done, the final computed value gets returned to parent which uses it for its own computation.
-exports.traverseDepthPure = function( root, data, fromParent, prep_call, compute_call){
+var traverseDepthPure = function( root, data, fromParent, prep_call, compute_call){
     var chs = childNodes( root, data );
-    
     return chs.reduce( function(siblings_computed, node, i){
-        
-        var prepRes = prep_call(node, fromParent)
-
-        var children_computed = traverseChDepthPure( node, data, prepRes, prep_call, compute_call );
-
-        return compute_call(node, fromParent, fromPrep, siblings_computed, children_computed)
-    });
+        return prepTraverseCompute(node, data, siblings_computed, fromParent, prep_call, compute_call);
+    }, null);
+}
+var prepTraverseCompute = function(node, data, siblings_computed, fromParent, prep_call, compute_call){
+    var prepRes = prep_call(node, fromParent)
+    if(prepRes === fromParent)
+        throw new Error("Do not mutate fromParent inside of 'prep_call' and create " +
+                        "a new object instead. Otherwise parent's next state won't " + 
+                        "be transitioned properly");
+    
+    var children_computed = traverseDepthPure( node, data, prepRes, prep_call, compute_call );
+    
+    return compute_call(node, fromParent, prepRes, siblings_computed, children_computed);
 }
 
 // Pure Depth First Traversal with Transformative Parse Tree
-exports.traversePure = function(data, node_call, parent_call ){
+exports.traversePure = function(data, prep_call, compute_call ){
     //var level = 0;
-    if( !node_call || !parent_call ) { return false}
+    if( !prep_call || !compute_call ) { return false}
     if( !Array.isArray( data ) ) { node_call("Array expected"); return false};
 
-    for(var i = 0; i < data.length; i++ ){
-  if( !data[i].p ){
-      var takeNode = take( data[i], options );
-            
-            //var isLast = data.length === i+1 ;
-            var nodecbRes = node_call( null, data[i], 0, {p:null})
-            
-            if( takeNode && (nodecbRes === null))
-                return false;
-            traverseChDepthPure( data[i], data, nodecbRes, node_call, parent_call );
-            
-  }
-    }
+    return prepTraverseCompute(data[0], data, {}, {}, prep_call, compute_call);
 }
 
 exports.stateMachine = function stateMachine(states, nodeType) {
     if (!Array.isArray(states)) throw new Error("'states' should be an Array of [currentState, nodeType, nextState] items");
     if (!(typeof nodeType === 'function')) throw new Error("'nodeType' should be a function");
 
-    var next = function next(current_state, node) {
-  if (!(typeof current_state === 'string')) ;
-  throw new Error("'current_state' should be a string");
-
-  var node_type = nodeType(node);
-
-  var next_state = states.find(function (el) {
-      return el[0] === current_state && el[1] === node_type;
-  });
-
-  if (!next_state) throw new Error("The state " + next_state + " does not exist");
-
-  return next_state;
-    };
+    return {
+        states: states,
+        nodeType: nodeType,
+        
+        next : function(current_state, node) {
+            if (!(typeof current_state === 'string'))
+                throw new Error("'current_state' should be a string");
+            
+            var node_type = nodeType(current_state, node);
+            
+            var next_state = states.find(function (el) {
+                return el[0] === current_state && el[1] === node_type;
+            });
+            
+            if (!next_state)
+                throw new Error("There is no state for 'current_state' : " +
+                                current_state + " 'and node_type' : " + node_type);
+            
+            return next_state[2];
+        }
+    }
 }
 
 exports.mmapToMap = function(data){
