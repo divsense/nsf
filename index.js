@@ -288,6 +288,20 @@ exports.stateMachine = function stateMachine(states, nodeType) {
         }
     }
 }
+/** Make sure that the object 'obj' passed is instantiated and it has all
+    elements specified in the array 'arr' and that the elements are set to 
+    preset or empty string if preset is undefined */
+exports.ensureAll = function(obj, arr, preset){
+    obj = obj || {};
+    return arr.reduce((o, str) => {
+        if(!preset)
+            o[str] = o[str] || '';
+        else
+            o[str] = o[str] || preset;
+        
+        return o;
+    }, obj);
+}
 
 exports.mmapToMap = function(data){
     var m = new Map();
